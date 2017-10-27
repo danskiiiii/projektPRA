@@ -1,4 +1,0 @@
-2. select a from b where c order by d  
-5. select a from b where c order by d  
-7. select a from b where c order by d  
-121. select a from b where c order by d  
