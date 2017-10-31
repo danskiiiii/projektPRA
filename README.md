@@ -2,7 +2,7 @@
 
 Current features: 
 checking if string queries match the schema, 
-saving correct queries to a txt file
-calculating time left until the end of school period
+saving correct queries to a txt file,
+calculating time left until the end of school period.
 
 To run the program: download the repository, open "projektPRA.sln" in Visual Studio and press F5. 
