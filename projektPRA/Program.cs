@@ -11,7 +11,6 @@ using Chroniton.Jobs;
 using Chroniton.Schedules;
 
 
-
 namespace projektPRA
 {
     class Program
@@ -20,44 +19,70 @@ namespace projektPRA
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
+            Console.WriteLine("W celu wyjścia z programu należy podać 0 jako numer zapytania.");
             File.Create("odp.txt").Close();
-            string answers = "";
+            string temp = "";
+            int number =0;
+            string text = "";
+            QueryChecker currentQuery = new QueryChecker(number, text);
+            SchoolPeriodChecker timeChecker = new SchoolPeriodChecker();
+            List<QueryChecker> queryList = new List<QueryChecker>();
 
+
+            /// <summary>
+            /// code for running cron jobs
+            /// </summary>
             var factory = new SingularityFactory();
             var singularity = factory.GetSingularity();
 
-            var job = new SimpleParameterizedJob<string>((parameter, scheduledTime) =>
-             File.WriteAllText("odp.txt", answers));
+            //writing queries to a file every 30 sec
+            var job1 = new SimpleParameterizedJob<string>((parameter, scheduledTime) =>
+            File.WriteAllText("odp.txt", temp));
 
-            var schedule1 = new CronSchedule("0,30 * * * * * *");
-
+            var schedule1 = new CronSchedule("0,30 * * * * * *");            
             var scheduledJob1 = singularity.ScheduleParameterizedJob(
-                schedule1, job, "", true);
+                schedule1, job1, "", true);
+
+            //displaying time left until the end of current school period
+            var job2 = new SimpleParameterizedJob<string>((parameter, scheduledTime) =>
+            Console.WriteLine("                           "+timeChecker.CheckPeriod(DateTime.Now)));
+
+            var schedule2 = new CronSchedule("0 * 7-17 ? * MON-FRI *"); // cron schedule works in UTC time zone, offset -1 hour to convert to CET time
+            var scheduledJob2 = singularity.ScheduleParameterizedJob(
+                schedule2, job2, "", true);
 
             singularity.Start();
 
-
-
-            List<QueryChecker> queryList = new List<QueryChecker>();
-
+            /// <summary>
+            /// main loop: takes input from user and processes it
+            /// </summary>
             while (true)
             {
-                Console.WriteLine(Environment.NewLine+"Proszę podać numer zapytania:" + Environment.NewLine );
-                int number = Convert.ToInt32(Console.ReadLine());
+                // taking input from user
+                try
+                {
+                    Console.WriteLine(Environment.NewLine + "Proszę podać numer zapytania:");
+                    number = Convert.ToInt32(Console.ReadLine());
+                }
+                catch 
+                {
+                    Console.WriteLine(Environment.NewLine + "Wprowadzono niepoprawny numer zapytania!");
+                    continue;
+                }                
+                if (number == 0) break; //exit the loop if 0 was entered as query number
 
-                Console.WriteLine(Environment.NewLine+"Proszę wpisać zapytanie:" + Environment.NewLine);
-                string text = Console.ReadLine();
-                answers = "";
+                Console.WriteLine(Environment.NewLine+"Proszę wpisać zapytanie:");
+                text = Console.ReadLine();
 
-                QueryChecker currentQuery = new QueryChecker(number, text);
-
+                // checking if the SQL query is correct
                 bool correct = currentQuery.CheckQuery(text);
 
                 if (correct)
-
                 {
-                    Console.WriteLine(Environment.NewLine+"Zapytanie poprawne. Zostanie dodane do pliku w ciągu najbliższych 30 sekund." + Environment.NewLine);
+                    temp = "";
+                    Console.WriteLine(Environment.NewLine+"Zapytanie poprawne. Zostanie automatycznie dodane do pliku w ciągu najbliższych 30 sekund.");
 
+                    // replacing old query if the ID is the same 
                     for (int i = queryList.Count - 1; i >= 0; i--)
                     {
                         if (queryList[i].QueryNr == number)
@@ -66,23 +91,25 @@ namespace projektPRA
                         }
                     }
 
+                    // adding new query to list of objects and sorting it
                     queryList.Add(new QueryChecker(number, text));
                     queryList.Sort(QueryChecker.SortQueries);
-                
-                   
 
-                        foreach (var query in queryList)
-
-                        { answers += (Convert.ToString(query.QueryNr) + ". " + query.QueryText + Environment.NewLine); }
+                    // parsing objects from a list to temp string (for txt file export purpose)
+                    foreach (var query in queryList)
+                    {
+                      temp += (Convert.ToString(query.QueryNr) + ". " + query.QueryText + Environment.NewLine);
+                    }
                 }
 
-                else Console.WriteLine(Environment.NewLine+"Zapytanie nie spełnia wymagań!" + Environment.NewLine);
-
-                              
-                // select a from b where c order by d          
-                            
+                // informing user about incorrect query
+                else Console.WriteLine(Environment.NewLine+ "Zapytanie nie spełnia wymagań!");                     
+                             
+                           
             }
 
+            //add remaining correct queries to odp.txt after exiting the loop
+            File.WriteAllText("odp.txt", temp);
 
         }
     }

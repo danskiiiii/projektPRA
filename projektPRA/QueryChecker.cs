@@ -7,7 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 namespace projektPRA
 {
-    class QueryChecker
+  public class QueryChecker
     {
         private int queryNr;
         private string queryText;
@@ -30,7 +30,9 @@ namespace projektPRA
             set { queryText = value; }
         }
 
-
+        /// <summary>
+        /// method for checking if string is a valid SQL query
+        /// </summary>
         public bool CheckQuery(string s)
         {
             Regex rex = new Regex(@"((select )).*(( from )).*(( where )).*(( order by ))", RegexOptions.IgnoreCase);
@@ -40,6 +42,9 @@ namespace projektPRA
             else return false;
         }
 
+        /// <summary>
+        /// method for sorting SQL queries by query number
+        /// </summary>
         public static int SortQueries(QueryChecker x, QueryChecker y)
         { return x.QueryNr.CompareTo(y.QueryNr); }
 
