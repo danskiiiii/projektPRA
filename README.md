@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/danskiiiii/projektPRA.svg?branch=master)](https://travis-ci.org/danskiiiii/projektPRA)
+
+
 "projektPRA" is a C# Console App (.NET Core), created as a school assignment by Daniel Wilczewski. Work in progress. 
 
 Current features: 
