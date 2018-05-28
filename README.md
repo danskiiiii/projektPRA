@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/danskiiiii/projektPRA.svg?branch=master)](https://travis-ci.org/danskiiiii/projektPRA)
-
+[![Build Status](https://travis-ci.org/danskiiiii/projektPRA_part_1.svg?branch=master)
 ## "projektPRA_part_1" ##
 C# Console App (.NET Core), created as a school assignment. 
 
